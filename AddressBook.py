@@ -1,6 +1,7 @@
 #import Contact
 import pickle
 import random
+import re
 
 class AddressBook:
     size = 0
@@ -23,9 +24,11 @@ class AddressBook:
             pickle.dump(self.contacts,db,0)
     
     def __generateContactID(self):
-        #return round(random.random() * 1000000)
-        self.size += 1
-        return self.size
+        if self.size < 1:
+            return 1
+        
+        last_id = self.contacts[-1].contact_id
+        return last_id + 1
     
     def addContact(self, contact):
         contact.setID(self.__generateContactID())
@@ -34,8 +37,16 @@ class AddressBook:
     
     def getContactByID(self, contact_id):
         for contact in  self.contacts:
-            if contact.contact_id == contact_id:
+            if contact.contact_id == int(contact_id):
                 return contact
+        return False
+    
+    def deleteContactByID(self, contact_id):
+        for index, contact in  enumerate(self.contacts):
+            if contact.contact_id == int(contact_id):
+                del self.contacts[index]
+                self.__saveContacts()
+                return True
         return False
     
     def deleteAll(self):
@@ -49,4 +60,9 @@ class AddressBook:
         print("ID\t|\tName\t|\tPhones\n-------------------------------------|")
         for c in self.contacts:
             print(c.contact_id,"\t|\t",c.name,"\t|\t",'; '.join(c.phones),"|")
-
+    
+    def validateName(name):
+        return re.match('^[ .0-9a-zA-Z()]+$',name)
+    
+    def validatePhone(phone):
+        return re.match('^\+?[- 0-9]+',phone)

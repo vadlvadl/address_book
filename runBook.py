@@ -6,32 +6,40 @@ from AddressBook import AddressBook
 from Contact import Contact
 
 
-from pprint import pprint
-
 addressBookFile = 'contacts.pckl'
 
-abook = AddressBook(addressBookFile)
-is_running = True
-
 def addContact():
-    name = input('Enter name:')
-    phone_number = input('Enter phone number:')
+    valid_name = valid_phone = False
+    while not valid_name or not valid_phone:
+        if not valid_name:
+            name = input('Enter name:')
+            valid_name = AddressBook.validateName(name)
+        elif not valid_phone:
+            phone_number = input('Enter phone number:')
+            valid_phone = AddressBook.validatePhone(phone_number)
     
     c1 = Contact(name)
     c1.addPhone(phone_number)
-    
     abook.addContact(c1)
-    pprint(c1)
 
 def deleteContacts():
-    contactID = input('Enter contact ID which you want delete (type "all" to clear address book):\n')
+    contact_id = input('Enter contact ID which you want delete (type "all" to clear address book):\n')
     
-    if contactID == 'all':
-        confirmation = input('You want to delete ALL contacts. Are you sure? (y/N)')
-        if confirmation == 'y' or confirmation == 'Y':
+    if contact_id == 'all':
+        if confirmDelete('ALL'):
             abook.deleteAll()
     else:
-        
+        contact = abook.getContactByID(contact_id)
+        if contact and confirmDelete(contact.name):
+            abook.deleteContactByID(contact_id)
+
+def confirmDelete(name):
+    confirmation = input('You want to delete {0} contact(s). Are you sure? (y/N)'.format(name))
+    return confirmation == 'y' or confirmation == 'Y'
+
+
+abook = AddressBook(addressBookFile)
+is_running = True
 
 while is_running:
     option = input('''Select option:
@@ -43,7 +51,6 @@ while is_running:
     
     if option == 'p':
         abook.print()
-        repr(abook)
     elif option == 'a':
         addContact()
     elif option == 'd':
